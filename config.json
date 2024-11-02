@@ -1,0 +1,11 @@
+{
+    "binutils": "2.43",
+    "gdb": "15.2",
+    "gcc": "14.2.0",
+    "mingw": "12.0.0",
+    "mingw_prefix": "tools/pegcc",
+    "elf_prefix": "tools/elfgcc",
+    "mingw_win_prefix": "tools/win_pegcc",
+    "elf_win_prefix": "tools/win_elfgcc",
+    "archive_prefix": "archives"
+}
