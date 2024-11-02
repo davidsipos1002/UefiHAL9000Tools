@@ -13,3 +13,5 @@ Use the pack equivalents to archive and distribute the compilers
 To build the compilers for HAL you need:
 - look at the extracted sopurces there is a file
 - or inspect gcc documentation
+
+To build OVMF.fd follow the steps in the EDK2 guide
