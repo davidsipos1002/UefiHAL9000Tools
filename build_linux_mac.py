@@ -114,7 +114,7 @@ def build_mingw_toolchain(prefix):
     get_subprocess_output(p)
     
     print('   Installing binutils...')
-    p = subprocess.Popen(f'gmake install', 
+    p = subprocess.Popen(f'gmake install-strip', 
                          stdout=subprocess.PIPE, 
                          env=env,
                          cwd=f'build/build-binutils-{target}/',
@@ -165,7 +165,7 @@ def build_mingw_toolchain(prefix):
     get_subprocess_output(p)
 
     print('   Installing gcc...')
-    p = subprocess.Popen(f'gmake install-gcc', 
+    p = subprocess.Popen(f'gmake install-strip-gcc', 
                          stdout=subprocess.PIPE, 
                          env=env,
                          cwd=f'build/build-gcc-{target}/',
@@ -194,7 +194,7 @@ def build_mingw_toolchain(prefix):
     get_subprocess_output(p)
   
     print('  Installing mingw...')
-    p = subprocess.Popen(f'gmake install', 
+    p = subprocess.Popen(f'gmake install-strip', 
                          stdout=subprocess.PIPE, 
                          env=env_copy,
                          cwd=f'build/build-mingw-libs-{target}/',
@@ -218,7 +218,7 @@ def build_mingw_toolchain(prefix):
     get_subprocess_output(p)
   
     print('  Installing mingw winpthreads...')
-    p = subprocess.Popen(f'gmake install', 
+    p = subprocess.Popen(f'gmake install-strip', 
                          stdout=subprocess.PIPE, 
                          env=env_copy,
                          cwd=f'build/build-mingw-winpthreads-{target}/',
@@ -234,7 +234,7 @@ def build_mingw_toolchain(prefix):
     get_subprocess_output(p)
 
     print('   Installing gcc libs...')
-    p = subprocess.Popen(f'gmake install', 
+    p = subprocess.Popen(f'gmake install-strip', 
                          stdout=subprocess.PIPE, 
                          env=env,
                          cwd=f'build/build-gcc-{target}/',
@@ -275,7 +275,7 @@ def build_elf_toolchain(prefix):
     get_subprocess_output(p)
     
     print('   Installing binutils...')
-    p = subprocess.Popen(f'gmake install', 
+    p = subprocess.Popen(f'gmake install-strip', 
                          stdout=subprocess.PIPE, 
                          env=env,
                          cwd=f'build/build-binutils-{target}/',
@@ -307,7 +307,7 @@ def build_elf_toolchain(prefix):
     get_subprocess_output(p)
 
     print('   Installing gcc...')
-    p = subprocess.Popen(f'gmake install-gcc', 
+    p = subprocess.Popen(f'gmake install-strip-gcc', 
                          stdout=subprocess.PIPE, 
                          env=env,
                          cwd=f'build/build-gcc-{target}/',
@@ -331,7 +331,7 @@ def build_elf_toolchain(prefix):
     get_subprocess_output(p)
     
     print('   Installing gmp...')
-    p = subprocess.Popen(f'gmake install', 
+    p = subprocess.Popen(f'gmake install-strip', 
                          stdout=subprocess.PIPE, 
                          env=env,
                          cwd=f'build/build-gcc-{target}/gmp',
@@ -339,7 +339,7 @@ def build_elf_toolchain(prefix):
     get_subprocess_output(p)
     
     print('   Installing mpfr...')
-    p = subprocess.Popen(f'gmake install', 
+    p = subprocess.Popen(f'gmake install-strip', 
                          stdout=subprocess.PIPE, 
                          env=env,
                          cwd=f'build/build-gcc-{target}/mpfr',
@@ -347,7 +347,7 @@ def build_elf_toolchain(prefix):
     get_subprocess_output(p)
 
     print('   Installing mpc...')
-    p = subprocess.Popen(f'gmake install', 
+    p = subprocess.Popen(f'gmake install-strip', 
                          stdout=subprocess.PIPE, 
                          env=env,
                          cwd=f'build/build-gcc-{target}/mpc',
@@ -409,7 +409,7 @@ def build_win_mingw(prefix, mingw_prefix):
     get_subprocess_output(p)
     
     print('   Installing binutils...')
-    p = subprocess.Popen(f'gmake install', 
+    p = subprocess.Popen(f'gmake install-strip', 
                          stdout=subprocess.PIPE, 
                          env=env,
                          cwd=f'build/build-win-binutils-{target}/',
@@ -441,7 +441,7 @@ def build_win_mingw(prefix, mingw_prefix):
     get_subprocess_output(p)
 
     print('   Installing gcc...')
-    p = subprocess.Popen(f'gmake install', 
+    p = subprocess.Popen(f'gmake install-strip', 
                          stdout=subprocess.PIPE, 
                          env=env,
                          cwd=f'build/build-win-gcc-{target}/',
@@ -469,7 +469,7 @@ def build_win_mingw(prefix, mingw_prefix):
     get_subprocess_output(p)
   
     print('  Installing mingw...')
-    p = subprocess.Popen(f'gmake install', 
+    p = subprocess.Popen(f'gmake install-strip', 
                          stdout=subprocess.PIPE, 
                          env=env,
                          cwd=f'build/build-mingw-libs-{target}/',
@@ -481,7 +481,7 @@ def build_win_mingw(prefix, mingw_prefix):
     p.wait()
 
     print('   Installing gmp...')
-    p = subprocess.Popen(f'gmake install', 
+    p = subprocess.Popen(f'gmake install-strip', 
                          stdout=subprocess.PIPE, 
                          env=env,
                          cwd=f'build/build-win-gcc-{target}/gmp',
@@ -489,7 +489,7 @@ def build_win_mingw(prefix, mingw_prefix):
     get_subprocess_output(p)
     
     print('   Installing mpfr...')
-    p = subprocess.Popen(f'gmake install', 
+    p = subprocess.Popen(f'gmake install-strip', 
                          stdout=subprocess.PIPE, 
                          env=env,
                          cwd=f'build/build-win-gcc-{target}/mpfr',
@@ -497,7 +497,7 @@ def build_win_mingw(prefix, mingw_prefix):
     get_subprocess_output(p)
 
     print('   Installing mpc...')
-    p = subprocess.Popen(f'gmake install', 
+    p = subprocess.Popen(f'gmake install-strip', 
                          stdout=subprocess.PIPE, 
                          env=env,
                          cwd=f'build/build-win-gcc-{target}/mpc',
@@ -534,7 +534,7 @@ def build_win_elf(prefix, mingw_prefix, elf_prefix, win_mingw_prefix):
     get_subprocess_output(p)
     
     print('   Installing binutils...')
-    p = subprocess.Popen(f'gmake install', 
+    p = subprocess.Popen(f'gmake install-strip', 
                          stdout=subprocess.PIPE, 
                          env=env,
                          cwd=f'build/build-win-elf-binutils-{target}/',
@@ -566,7 +566,7 @@ def build_win_elf(prefix, mingw_prefix, elf_prefix, win_mingw_prefix):
     get_subprocess_output(p)
 
     print('   Installing gcc...')
-    p = subprocess.Popen(f'gmake install-gcc', 
+    p = subprocess.Popen(f'gmake install-strip-gcc', 
                          stdout=subprocess.PIPE, 
                          env=env,
                          cwd=f'build/build-win-elf-gcc-{target}/',
