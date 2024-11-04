@@ -25,7 +25,7 @@ def reporthook(count, block_size, total_size):
                     (percent, progress_size / (1024 * 1024), speed, duration))
     sys.stdout.flush()
 
-def download_sources(binutils_version, gdb_version, gcc_version, mingw_version):
+def download_sources(binutils_version, gdb_version, gcc_version, mingw_version, mtools_version):
     binutils_link = 'https://ftp.gnu.org/gnu/binutils'
     binutils = f'binutils-{binutils_version}'
     binutils_filename = f'{binutils}.tar.gz'
@@ -42,6 +42,10 @@ def download_sources(binutils_version, gdb_version, gcc_version, mingw_version):
     mingw = f'mingw-w64-v{mingw_version}'
     mingw_filename = f'{mingw}.tar.bz2'
 
+    mtools_link = 'https://ftp.gnu.org/gnu/mtools'
+    mtools = f'mtools-{mtools_version}'
+    mtools_filename = f'{mtools}.tar.gz' 
+
     os.makedirs('tarballs', exist_ok=True)
 
     print('   Downloading binutils...')
@@ -55,6 +59,9 @@ def download_sources(binutils_version, gdb_version, gcc_version, mingw_version):
     print()
     print('   Downloading mingw...')
     urllib.request.urlretrieve(f'{mingw_link}/{mingw_filename}', f'tarballs/{mingw_filename}', reporthook)
+    print()
+    print('   Downloading mtools...')
+    urllib.request.urlretrieve(f'{mtools_link}/{mtools_filename}', f'tarballs/{mtools_filename}', reporthook)
     print()
 
 def extract_sources():
@@ -613,8 +620,71 @@ def build_win_elf(prefix, mingw_prefix, elf_prefix, win_mingw_prefix):
                          shell=True)
     get_subprocess_output(p)
 
+def build_mtools(prefix):
+    os.makedirs(f'build/build-mtools', exist_ok=True)
+    
+    mtools = glob.glob('sources/*mtools*')[0]
+
+    # env = os.environ.copy()
+    # if mingw_prefix:
+    #     env['PATH'] = f'{os.path.abspath(mingw_prefix)}/bin:{env['PATH']}'
+    
+    print('   Configuring mtools...')
+    p = subprocess.run(f'../../{mtools}/configure --prefix={os.path.abspath(prefix)} --disable-floppyd',
+                       cwd=f'build/build-mtools',
+                       shell=True)
+   
+    print('   Building mtools...')
+    p = subprocess.run(f'make -j16',
+                       cwd=f'build/build-mtools',
+                       shell=True)
+ 
+    print('   Installing mtools...')
+    p = subprocess.run(f'make install',
+                       cwd=f'build/build-mtools',
+                       shell=True)
+
+def build_win_mtools(prefix, mingw_prefix):
+    host = 'x86_64-w64-mingw32'
+
+    os.makedirs(f'build/build-win-mtools', exist_ok=True)
+    
+    mtools = glob.glob('sources/*mtools*')[0]
+
+    env = os.environ.copy()
+    env['CC'] = f'{host}-gcc'
+    env['CFLAGS'] = '-Wno-incompatible-pointer-types'
+    env['PATH'] = f'{os.path.abspath(mingw_prefix)}/bin:{env['PATH']}'
+    
+    print('   Configuring mtools...')
+    p = subprocess.run(f'../../{mtools}/configure --prefix={os.path.abspath(prefix)} --disable-floppyd --host {host}',
+                       cwd=f'build/build-win-mtools',
+                       env=env,
+                       shell=True)
+   
+    print('   Building mtools...')
+    p = subprocess.run(f'gmake -j16',
+                       cwd=f'build/build-win-mtools',
+                       env=env,
+                       shell=True)
+ 
+    print('   Installing mtools...')
+    p = subprocess.run(f'cp *.exe {os.path.abspath(prefix)}/bin',
+                       cwd=f'build/build-win-mtools',
+                       env=env,
+                       shell=True)
+
+    
 def pack_compiler(archive_prefix, prefix, arch, platform, binfmt):
     xz_file = lzma.LZMAFile(os.path.join(archive_prefix, f'{arch}-{platform}-{binfmt}-gcc.tar.xz'), 'w')
+    tar_file = TarFile.open(mode='w', fileobj=xz_file)
+    for filename in os.listdir(prefix):
+        path = os.path.join(prefix, filename)
+        tar_file.add(os.path.join(prefix, filename), arcname=os.path.basename(path))
+    xz_file.close()
+
+def pack_mtools(archive_prefix, prefix, arch, platform):
+    xz_file = lzma.LZMAFile(os.path.join(archive_prefix, f'{arch}-{platform}-mtools.tar.xz'), 'w')
     tar_file = TarFile.open(mode='w', fileobj=xz_file)
     for filename in os.listdir(prefix):
         path = os.path.join(prefix, filename)
@@ -633,11 +703,15 @@ def main():
     parser.add_argument('--build_elf', action='store_true', default=False)
     parser.add_argument('--build_win_mingw', action='store_true', default=False)
     parser.add_argument('--build_win_elf', action='store_true', default=False)
+    parser.add_argument('--build_mtools', action='store_true', default=False)
+    parser.add_argument('--build_win_mtools', action='store_true', default=False)
 
     parser.add_argument('--pack_mingw', action='store_true', default=False)
     parser.add_argument('--pack_elf', action='store_true', default=False)
     parser.add_argument('--pack_win_mingw', action='store_true', default=False)
     parser.add_argument('--pack_win_elf', action='store_true', default=False)
+    parser.add_argument('--pack_mtools', action='store_true', default=False)
+    parser.add_argument('--pack_win_mtools', action='store_true', default=False)
 
     parser.add_argument('--cleanup', action='store_true', default=False)
     parser.add_argument('-config', '--config', required=True, type=str, help="Configuration JSON, see example")
@@ -656,7 +730,7 @@ def main():
 
     if not os.path.isdir('tarballs'):
         print('Downloading sources:')
-        download_sources(config['binutils'], config['gdb'], config['gcc'], config['mingw'])
+        download_sources(config['binutils'], config['gdb'], config['gcc'], config['mingw'], config['mtools'])
         print('Done.')
 
     if not os.path.isdir('sources'):
@@ -684,6 +758,16 @@ def main():
         build_win_elf(config['elf_win_prefix'], config['mingw_prefix'], config['elf_prefix'], config['mingw_win_prefix'])
         print('Done.')
     
+    if args['build_mtools']:
+        print('Building mtools...')
+        build_mtools(config['mtools_prefix'])
+        print('Done.')
+
+    if args['build_win_mtools']:
+        print('Building mtools...')
+        build_win_mtools(config['mtools_win_prefix'], config['mingw_prefix'])
+        print('Done.')
+
     os_name = str(platform.system()).lower()
     arch = str(platform.machine()).lower()
 
@@ -699,6 +783,12 @@ def main():
         pack_compiler(config['archive_prefix'], config['elf_prefix'], arch, os_name, 'elf')
         print('Done.')
     
+    if args['pack_mtools']:
+        os.makedirs(config['archive_prefix'], exist_ok=True)
+        print(f'Packing mtools for {arch}-{os_name}')
+        pack_mtools(config['archive_prefix'], config['mtools_prefix'], arch, os_name)
+        print('Done.')
+    
     if args['pack_win_mingw']:
         os.makedirs(config['archive_prefix'], exist_ok=True)
         print(f'Packing MinGW for amd64-windows')
@@ -709,6 +799,12 @@ def main():
         os.makedirs(config['archive_prefix'], exist_ok=True)
         print(f'Packing ELF for amd64-windows')
         pack_compiler(config['archive_prefix'], config['elf_win_prefix'], 'amd64', 'windows', 'elf')
+        print('Done.')
+
+    if args['pack_win_mtools']:
+        os.makedirs(config['archive_prefix'], exist_ok=True)
+        print(f'Packing mtools for amd64-windows')
+        pack_mtools(config['archive_prefix'], config['mtools_win_prefix'], 'amd64', 'windows')
         print('Done.')
 
 if __name__ == "__main__":
