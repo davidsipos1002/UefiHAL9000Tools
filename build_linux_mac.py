@@ -597,7 +597,7 @@ def build_win_elf(prefix, mingw_prefix, elf_prefix, win_mingw_prefix):
     get_subprocess_output(p)
     
     print('   Configuring gdb...')
-    p = subprocess.Popen(f'../../{gdb}/configure --host={host} --target={target} --prefix={os.path.abspath(prefix)} --with-gmp={os.path.abspath(win_mingw_prefix)} --with-mpfr={os.path.abspath(win_mingw_prefix)} --without-zstd --disable-nls --disable-werror', 
+    p = subprocess.Popen(f'../../{gdb}/configure --host={host} --target={target} --enable-targets={target},i386-elf --prefix={os.path.abspath(prefix)} --with-gmp={os.path.abspath(win_mingw_prefix)} --with-mpfr={os.path.abspath(win_mingw_prefix)} --without-zstd --disable-nls --disable-werror', 
                          stdout=subprocess.PIPE, 
                          env=env,
                          cwd=f'build/build-win-elf-gdb-{target}/',
