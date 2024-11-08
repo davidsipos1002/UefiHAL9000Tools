@@ -432,7 +432,7 @@ def build_win_mingw(prefix, mingw_prefix):
     get_subprocess_output(p)
 
     print('   Configuring gcc...')
-    p = subprocess.Popen(f'../../{gcc}/configure --host={target} --target={target} --prefix={os.path.abspath(prefix)} --disable-nls --disable-multilib --disable-werror --without-headers --without-newlib --enable-languages=c', 
+    p = subprocess.Popen(f'../../{gcc}/configure --host={target} --target={target} --prefix={os.path.abspath(prefix)} --disable-nls --disable-multilib --disable-werror --enable-languages=c,c++', 
                          stdout=subprocess.PIPE, 
                          env=env,
                          cwd=f'build/build-win-gcc-{target}/',
@@ -455,15 +455,11 @@ def build_win_mingw(prefix, mingw_prefix):
                          shell=True)
     get_subprocess_output(p)
 
-    print('  Copying libgcc to bin...')
-    p = subprocess.Popen(f'cp {os.path.abspath(prefix)}/lib/libgcc_s_seh-1.dll {os.path.abspath(prefix)}/bin/', shell=True)
-    p.wait()
-
     print('  Configuring mingw...')
-    p = subprocess.Popen(f'../../{mingw}/configure --host={target} --prefix={os.path.abspath(prefix)}/{target} --with-libraries=winpthread --disable-multilib', 
+    p = subprocess.Popen(f'../../{mingw}/configure --host={target} --prefix={os.path.abspath(prefix)}/{target} --with-libraries=winpthreads --disable-multilib', 
                          stdout=subprocess.PIPE, 
                          env=env,
-                         cwd=f'build/build-mingw-libs-{target}/',
+                         cwd=f'build/build-win-mingw-libs-{target}/',
                          shell=True)
     get_subprocess_output(p)
   
@@ -471,7 +467,7 @@ def build_win_mingw(prefix, mingw_prefix):
     p = subprocess.Popen(f'gmake -j16', 
                          stdout=subprocess.PIPE, 
                          env=env,
-                         cwd=f'build/build-mingw-libs-{target}/',
+                         cwd=f'build/build-win-mingw-libs-{target}/',
                          shell=True)
     get_subprocess_output(p)
   
@@ -479,9 +475,13 @@ def build_win_mingw(prefix, mingw_prefix):
     p = subprocess.Popen(f'gmake install-strip', 
                          stdout=subprocess.PIPE, 
                          env=env,
-                         cwd=f'build/build-mingw-libs-{target}/',
+                         cwd=f'build/build-win-mingw-libs-{target}/',
                          shell=True)
     get_subprocess_output(p)
+
+    print('  Copying libgcc to bin...')
+    p = subprocess.Popen(f'cp {os.path.abspath(prefix)}/lib/libgcc_s_seh-1.dll {os.path.abspath(prefix)}/bin/', shell=True)
+    p.wait()
 
     print('  Copying libwinpthread to bin...')
     p = subprocess.Popen(f'cp {os.path.abspath(prefix)}/{target}/bin/libwinpthread-1.dll {os.path.abspath(prefix)}/bin/', shell=True)
